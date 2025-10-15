@@ -3,13 +3,15 @@ import { KanbanBoardPage } from '../pages/KanbanBoardPage';
 import { CardPopup } from '../pages/CardPopup';
 import { retryUntilVisible } from '../utils/helpers';
 
-test('Complete and move incomplete cards from second column', async ({ page }) => {
+test('Edit a Kanban card to mark a subtask as complete and move the card to the first column', async ({ page }) => {
   const board = new KanbanBoardPage(page);
   const popup = new CardPopup(page);
 
   console.log('[TEST] Starting Kanban board automation...');
+  // Step 1: Navigate to the Kanban app
   await board.goto();
 
+   // Step 2: Get the title of the first column (destination for completed cards)
   const columnTitle = await board.getFirstColumnTitle();
 
   while (true) {
@@ -41,15 +43,22 @@ test('Complete and move incomplete cards from second column', async ({ page }) =
     }
 
     try {
+      // Step 3: Open the card and complete one or more subtasks
       await card.click();
       await popup.waitForPopup();
 
       const popupTitle = await popup.getTitle();
       expect(popupTitle).toBe(title);
 
+      // Step 4: Verify that the subtask is striked through in the popup
       completed += await popup.completeAllSubtasks();
 
+       // Step 5: Move task to the first column and 
+       // Step 6: Close the card edit page
       await board.moveCardToColumn(title, columnTitle);
+    
+      // Step 7: Verify that the number of completed subtasks is correct
+      // Step 8: Verify that the card moved to the correct column
       await board.verifyCardMoved(title, completed);
 
       console.log(`[SUCCESS] Card "${title}" moved and verified.`);
